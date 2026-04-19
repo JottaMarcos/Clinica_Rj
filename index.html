@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Executivo — Clínica</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#060f1e;color:#fff;min-height:100vh}
+.header{background:#0a1628;padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1a2e4a;position:sticky;top:0;z-index:100}
+.logo{width:36px;height:36px;background:#0d47a1;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:20px;height:20px}
+.header-title{font-size:15px;font-weight:600;color:#e3edf9;line-height:1.2}
+.header-sub{font-size:11px;color:#5c85b4}
+.header-right{margin-left:auto;font-size:11px;color:#5c85b4;text-align:right;line-height:1.5;display:none}
+@media(min-width:600px){.header-right{display:block}}
+.nav{background:#0a1628;border-bottom:1px solid #1a2e4a;display:flex;overflow-x:auto;scrollbar-width:none;padding:0 16px}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{padding:10px 16px;font-size:13px;color:#5c85b4;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s}
+.nav-btn.active{color:#4fc3f7;border-bottom:2px solid #4fc3f7}
+.body{padding:14px 14px 80px;max-width:1200px;margin:0 auto}
+@media(min-width:768px){.body{padding:20px 24px 40px}}
+.alert-box{background:#1c1400;border:1px solid #4d3300;border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px}
+.alert-icon{font-size:15px;color:#ffb300;flex-shrink:0;margin-top:1px}
+.alert-text{font-size:12px;color:#c9b97a;line-height:1.6}
+.alert-text strong{color:#ffb300}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(min-width:600px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:#0a1628;border:1px solid #1a2e4a;border-radius:10px;padding:12px 14px}
+.kpi-label{font-size:10px;color:#5c85b4;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kpi-value{font-size:20px;font-weight:600;color:#e3edf9;line-height:1.1}
+@media(min-width:600px){.kpi-value{font-size:22px}}
+.kpi-value.green{color:#43a047}
+.kpi-value.red{color:#e53935}
+.kpi-value.yellow{color:#fb8c00}
+.kpi-sub{font-size:10px;color:#5c85b4;margin-top:3px}
+.kpi-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-top:5px}
+.badge-red{background:#2d0f0f;color:#ef5350}
+.card{background:#0a1628;border:1px solid #1a2e4a;border-radius:10px;padding:14px;margin-bottom:14px}
+.card-title{font-size:11px;color:#5c85b4;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;font-weight:600}
+.grid-2{display:grid;gap:14px;margin-bottom:14px;grid-template-columns:1fr}
+@media(min-width:640px){.grid-2{grid-template-columns:1fr 1fr}}
+.chart-wrap{position:relative;width:100%}
+.legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#5c85b4}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.plano-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #0f1e32}
+.plano-row:last-child{border:none}
+.plano-name{font-size:13px;color:#c0d4e8;font-weight:500}
+.plano-val{font-size:13px;color:#4fc3f7}
+.plano-tag{font-size:10px;color:#ef9a9a;background:#2d1212;padding:2px 7px;border-radius:20px;margin-top:2px}
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.donut-legend{flex:1;min-width:0}
+.donut-leg-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #0f1e32;font-size:12px;color:#c0d4e8}
+.donut-leg-row:last-child{border:none}
+.donut-dot{width:10px;height:10px;border-radius:50%;margin-right:7px;display:inline-block;flex-shrink:0}
+.geo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.geo-card{background:#060f1e;border:1px solid #1a2e4a;border-radius:8px;padding:10px;text-align:center}
+.geo-name{font-size:10px;color:#5c85b4;margin-bottom:3px;line-height:1.3}
+.geo-val{font-size:17px;font-weight:600;color:#4fc3f7}
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.insight-card{background:#060f1e;border-left:3px solid;border-radius:6px;padding:10px}
+.insight-card.blue{border-color:#0d47a1}
+.insight-card.green{border-color:#1b5e20}
+.insight-card.red{border-color:#b71c1c}
+.insight-card.amber{border-color:#e65100}
+.insight-title{font-size:10px;font-weight:600;color:#7fa8cc;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.insight-body{font-size:11px;color:#5c85b4;line-height:1.5}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px}
+th{text-align:left;color:#5c85b4;font-weight:600;padding:6px 8px;border-bottom:1px solid #1a2e4a;font-size:11px;white-space:nowrap}
+td{padding:7px 8px;color:#c0d4e8;border-bottom:1px solid #0f1e32;white-space:nowrap}
+tr:hover td{background:#0d1f38}
+.page{display:none}
+.page.active{display:block}
+.footer{text-align:center;padding:20px;font-size:11px;color:#2a4060}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#4fc3f7" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+  </div>
+  <div>
+    <div class="header-title">Clínica — Painel Executivo</div>
+    <div class="header-sub">Jan 2025 – Fev 2026</div>
+  </div>
+  <div class="header-right">30.000 registros<br>Atualizado hoje</div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="showPage('fin',this)">Financeiro</button>
+  <button class="nav-btn" onclick="showPage('ef',this)">Eficiência &amp; Logística</button>
+</div>
+
+<div id="fin" class="page active">
+<div class="body">
+  <div class="alert-box">
+    <div class="alert-icon">⚠</div>
+    <div class="alert-text"><strong>Alerta crítico:</strong> Cancelamento de 10% uniforme em todos os planos (Amil, Bradesco, Hapvida, NotreDame) — problema sistêmico, não de convênio. Receita perdida de <strong>R$ 965 Mil</strong> (~10% do total).</div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-label">Receita Total</div><div class="kpi-value">R$ 9,74 Mi</div><div class="kpi-sub">Jan 2025 – Fev 2026</div></div>
+    <div class="kpi"><div class="kpi-label">Ticket Médio</div><div class="kpi-value green">R$ 324,70</div><div class="kpi-sub">por consulta</div></div>
+    <div class="kpi"><div class="kpi-label">Receita Perdida</div><div class="kpi-value red">R$ 965 Mil</div><div class="kpi-badge badge-red">▼ 9,9% da receita</div></div>
+    <div class="kpi"><div class="kpi-label">Cancelamentos</div><div class="kpi-value yellow">10%</div><div class="kpi-badge badge-red">Todos os planos</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Panorama de faturamento mensal</div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#0d47a1"></div>Faturamento</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#e53935;width:16px;height:3px;border-radius:0"></div>Tendência</div>
+    </div>
+    <div class="chart-wrap" style="height:200px">
+      <canvas id="faturChart" role="img" aria-label="Faturamento mensal de jan/2025 a fev/2026">Oscilação entre R$ 233 e R$ 271 Mil, com queda em fev/26.</canvas>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Consultas realizadas vs canceladas</div>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#0d47a1"></div>Realizadas</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#e53935"></div>Canceladas</div>
+      </div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="consultaChart" role="img" aria-label="Consultas por mês">Realizadas 1,6k–2,2k, canceladas 215–353.</canvas>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Mix de meios de pagamento</div>
+      <div class="donut-wrap">
+        <div class="chart-wrap" style="height:140px;width:140px;flex-shrink:0">
+          <canvas id="donutChart" role="img" aria-label="PIX 40%, Crédito 33%, Débito 26%">PIX 40,19%, Crédito 33,36%, Débito 26,46%.</canvas>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-leg-row"><span><span class="donut-dot" style="background:#26c6da"></span>PIX</span><span>40,19%</span></div>
+          <div class="donut-leg-row"><span><span class="donut-dot" style="background:#1565c0"></span>Crédito</span><span>33,36%</span></div>
+          <div class="donut-leg-row"><span><span class="donut-dot" style="background:#0d47a1"></span>Débito</span><span>26,46%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top:14px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Eficiência operacional por plano</div>
+      <div class="plano-row"><div><div class="plano-name">Amil</div><div style="font-size:11px;color:#5c85b4">4.662 agendamentos</div></div><div style="text-align:right"><div class="plano-val">R$ 1,52 Mi</div><div class="plano-tag">10% cancel.</div></div></div>
+      <div class="plano-row"><div><div class="plano-name">Bradesco Saúde</div><div style="font-size:11px;color:#5c85b4">4.415 agendamentos</div></div><div style="text-align:right"><div class="plano-val">R$ 1,43 Mi</div><div class="plano-tag">10% cancel.</div></div></div>
+      <div class="plano-row"><div><div class="plano-name">Hapvida</div><div style="font-size:11px;color:#5c85b4">4.325 agendamentos</div></div><div style="text-align:right"><div class="plano-val">R$ 1,40 Mi</div><div class="plano-tag">10% cancel.</div></div></div>
+      <div class="plano-row"><div><div class="plano-name">NotreDame</div><div style="font-size:11px;color:#5c85b4">4.010 agendamentos</div></div><div style="text-align:right"><div class="plano-val">R$ 1,30 Mi</div><div class="plano-tag">10% cancel.</div></div></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Distribuição geográfica</div>
+      <div class="geo-grid">
+        <div class="geo-card"><div class="geo-name">Nova Iguaçu</div><div class="geo-val">3.172</div></div>
+        <div class="geo-card"><div class="geo-name">São Gonçalo</div><div class="geo-val">3.141</div></div>
+        <div class="geo-card"><div class="geo-name">Volta Red.</div><div class="geo-val">3.018</div></div>
+        <div class="geo-card"><div class="geo-name">Campos GTC</div><div class="geo-val">3.141</div></div>
+        <div class="geo-card"><div class="geo-name">Rio de Janeiro</div><div class="geo-val">3.040</div></div>
+        <div class="geo-card" style="background:#0a1628;border-color:#1a2e4a"><div class="geo-name">Total</div><div class="geo-val" style="color:#43a047">30k</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">Top remédios — receita por categoria</div>
+    <div class="chart-wrap" style="height:220px">
+      <canvas id="remChart" role="img" aria-label="Ranking remédios por receita">Anti-hipertensivo lidera com R$ 1,29 Mi.</canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Insights estratégicos</div>
+    <div class="insight-grid">
+      <div class="insight-card blue"><div class="insight-title">Oportunidade PIX</div><div class="insight-body">40% via PIX — criar desconto exclusivo e reduzir custo de taxas de cartão</div></div>
+      <div class="insight-card red"><div class="insight-title">Cancelamentos</div><div class="insight-body">10% em todos os planos: implantar confirmação ativa WhatsApp 24h antes</div></div>
+      <div class="insight-card amber"><div class="insight-title">Queda recente</div><div class="insight-body">Faturamento caiu 14% em 12 meses — investigar saída de médicos</div></div>
+      <div class="insight-card green"><div class="insight-title">Nova Iguaçu</div><div class="insight-body">Maior concentração — avaliar unidade satélite na região</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="ef" class="page">
+<div class="body">
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-label">Registros Totais</div><div class="kpi-value">30.000</div><div class="kpi-sub">base de pacientes</div></div>
+    <div class="kpi"><div class="kpi-label">Médico Mais Req.</div><div class="kpi-value green" style="font-size:14px;padding-top:2px">Anthony Viana</div><div class="kpi-sub">Clínico Geral</div></div>
+    <div class="kpi"><div class="kpi-label">Tipo + Cancelado</div><div class="kpi-value red" style="font-size:16px">Presencial</div><div class="kpi-sub">79,99% dos atend.</div></div>
+    <div class="kpi"><div class="kpi-label">Status Estoque</div><div class="kpi-value green" style="font-size:16px">OK ✓</div><div class="kpi-sub">Sem ruptura</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Scorecard de performance médica</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Médico</th><th>Especialidade</th><th>Turno</th><th>CRM</th><th>Ag.</th><th>Real.</th></tr></thead>
+        <tbody>
+          <tr><td>Ana Lívia Sá</td><td>Cardiologia</td><td>Manhã</td><td>RJ-86098</td><td>414</td><td>588</td></tr>
+          <tr><td>Natália Pires</td><td>Cardiologia</td><td>Manhã</td><td>RJ-21357</td><td>430</td><td>615</td></tr>
+          <tr><td>Pedro M. Vargas</td><td>Cardiologia</td><td>Tarde</td><td>RJ-34527</td><td>433</td><td>643</td></tr>
+          <tr><td>Raul Araújo</td><td>Cardiologia</td><td>Tarde</td><td>RJ-81420</td><td>408</td><td>559</td></tr>
+          <tr><td>Srta. Clara Pinto</td><td>Cardiologia</td><td>Manhã</td><td>RJ-34455</td><td>388</td><td>583</td></tr>
+          <tr><td>Theo Costela</td><td>Cardiologia</td><td>Tarde</td><td>RJ-69445</td><td>412</td><td>586</td></tr>
+          <tr><td>A. M. das Neves</td><td>Clínico Geral</td><td>Noite</td><td>RJ-70955</td><td>428</td><td>610</td></tr>
+          <tr><td>Calebe Machado</td><td>Clínico Geral</td><td>Tarde</td><td>RJ-26692</td><td>430</td><td>592</td></tr>
+          <tr><td>Dra. H. Sales</td><td>Clínico Geral</td><td>Tarde</td><td>RJ-75042</td><td>371</td><td>564</td></tr>
+          <tr><td>Felipe Cirino</td><td>Clínico Geral</td><td>Noite</td><td>RJ-13362</td><td>420</td><td>616</td></tr>
+          <tr><td>Fernanda Camargo</td><td>Clínico Geral</td><td>Manhã</td><td>RJ-50787</td><td>401</td><td>571</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Mix de especialidades</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="specChart" role="img" aria-label="Mix de especialidades por demanda e realizado">Clínico Geral lidera, seguido de Ginecologia e Neurologia.</canvas>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Atendimento: Presencial vs Online</div>
+      <div class="donut-wrap" style="margin-top:10px">
+        <div class="chart-wrap" style="height:140px;width:140px;flex-shrink:0">
+          <canvas id="tipoChart" role="img" aria-label="Presencial 80%, Online 20%">Presencial 79,99%, Online 20,01%.</canvas>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-leg-row"><span><span class="donut-dot" style="background:#1565c0"></span>Presencial</span><span>79,99%</span></div>
+          <div class="donut-leg-row"><span><span class="donut-dot" style="background:#26c6da"></span>Online</span><span>20,01%</span></div>
+          <div style="margin-top:12px;font-size:11px;color:#5c85b4;line-height:1.5">Presencial é o tipo mais cancelado. Ampliar telemedicina reduz no-shows.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">Insights de eficiência</div>
+    <div class="insight-grid">
+      <div class="insight-card blue"><div class="insight-title">Telemedicina</div><div class="insight-body">Só 20% online — ampliar oferta digital reduz no-shows e custo operacional</div></div>
+      <div class="insight-card amber"><div class="insight-title">Turno Noturno</div><div class="insight-body">Médicos no turno noite têm bom volume — verificar demanda reprimida</div></div>
+      <div class="insight-card green"><div class="insight-title">Estoque</div><div class="insight-body">Anti-hipertensivo lidera vendas — garantir margem de segurança no inventário</div></div>
+      <div class="insight-card red"><div class="insight-title">Cardiologia</div><div class="insight-body">6 cardiologistas — validar se a demanda justifica o custo fixo atual</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="footer">Clínica · Painel Executivo · Dados 2025–2026</div>
+
+<script>
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='ef'&&!window._ef){initEf();window._ef=true;}
+}
+
+const meses=['Jan/25','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan/26','Fev/26'];
+const faturData=[256.85,239.29,271.61,257.49,251.72,241.38,265.54,268.29,254.58,250.54,259.69,247.36,233.42,233.42];
+
+new Chart(document.getElementById('faturChart'),{type:'bar',data:{labels:meses,datasets:[{type:'bar',label:'Faturamento',data:faturData,backgroundColor:'#0d47a1',borderRadius:4,order:2},{type:'line',label:'Tendência',data:faturData,borderColor:'#e53935',borderWidth:2,pointRadius:0,tension:.4,fill:false,order:1,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.parsed.y.toFixed(1)+' Mil'}}},scales:{x:{ticks:{color:'#5c85b4',font:{size:9},maxRotation:45,autoSkip:false},grid:{color:'#0f1e32'}},y:{ticks:{color:'#5c85b4',font:{size:9},callback:v=>'R$'+v+'k'},grid:{color:'#0f1e32'}}}}});
+
+new Chart(document.getElementById('donutChart'),{type:'doughnut',data:{labels:['PIX','Crédito','Débito'],datasets:[{data:[40.19,33.36,26.46],backgroundColor:['#26c6da','#1565c0','#0d47a1'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}});
+
+new Chart(document.getElementById('consultaChart'),{type:'bar',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[{label:'Realizadas',data:[2200,2000,1700,1700,1700,1600,1700,1700,1600,1600,1700,1700],backgroundColor:'#0d47a1',borderRadius:4},{label:'Canceladas',data:[353,283,245,227,237,233,236,255,246,219,215,226],backgroundColor:'#e53935',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5c85b4',font:{size:9}},grid:{color:'#0f1e32'}},y:{ticks:{color:'#5c85b4',font:{size:9}},grid:{color:'#0f1e32'}}}}});
+
+new Chart(document.getElementById('remChart'),{type:'bar',data:{labels:['Anti-hiper.','Antibiótico','Anti-inflam.','Analgésico','Antiácido','Vitamina','Ansiolítico','Antidep.'],datasets:[{label:'Receita',data:[1298872,996436,961529,652103,651401,648699,642545,634860],backgroundColor:'#0d47a1',borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.parsed.x.toLocaleString('pt-BR')}}},scales:{x:{ticks:{color:'#5c85b4',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'#0f1e32'}},y:{ticks:{color:'#c0d4e8',font:{size:10}},grid:{display:false}}}}});
+
+function initEf(){
+  new Chart(document.getElementById('specChart'),{type:'bar',data:{labels:['Clín.Geral','Ginecologia','Neurologia','Cardiologia','Ortopedia','Endocrinologia','Oftalmologia','Pediatria','Psiquiatria','Dermato.'],datasets:[{label:'Demanda',data:[520,480,420,390,360,310,290,270,240,210],backgroundColor:'#0d47a1',borderRadius:3},{label:'Realizado',data:[490,450,400,360,340,290,270,250,220,195],backgroundColor:'#26c6da',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5c85b4',font:{size:9},maxRotation:45},grid:{color:'#0f1e32'}},y:{ticks:{color:'#5c85b4',font:{size:9}},grid:{color:'#0f1e32'}}}}});
+  new Chart(document.getElementById('tipoChart'),{type:'doughnut',data:{labels:['Presencial','Online'],datasets:[{data:[79.99,20.01],backgroundColor:['#1565c0','#26c6da'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}});
+}
+</script>
+</body>
+</html>
