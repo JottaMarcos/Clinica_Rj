@@ -13,7 +13,7 @@
 
 Este projeto consolida **30.000 registros** de atendimentos clínicos (Jan/2025 – Fev/2026) em um painel executivo interativo, permitindo tomada de decisão baseada em dados nas áreas financeira, operacional e logística.
 
-**Acesse o dashboard:** [jottamarcos.github.io/Clinica_Rj](https://jottamarcos.github.io/Clinica_Rj)
+**Acesse o dashboard:** [jottamarcos.github.io/Clinica_Rj](https://jottamarcos.github.io/Clinica_Rj/)
 
 ---
 
