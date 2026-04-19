@@ -169,7 +169,6 @@ Dados sintéticos gerados para fins educacionais e de portfólio, simulando o am
 
 **João Marcos**
 - GitHub: [@JottaMarcos](https://github.com/JottaMarcos)
-- Dashboard: [jottamarcos.github.io](https://jottamarcos.github.io)
 
 ---
 
